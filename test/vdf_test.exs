@@ -21,4 +21,17 @@ defmodule VDFTest do
     assert VDF.decode("a {b {c d} d e} b c") ==
              {:ok, %{"a" => %{"b" => %{"c" => "d"}, "d" => "e"}, "b" => "c"}}
   end
+
+  test "unicode" do
+    utf16_le_str =
+      :unicode.encoding_to_bom({:utf16, :little}) <>
+        :unicode.characters_to_binary(
+          "привет {hello {a b} world {c d}}",
+          :utf8,
+          {:utf16, :little}
+        )
+
+    assert VDF.decode(utf16_le_str) ==
+             {:ok, %{"привет" => %{"hello" => %{"a" => "b"}, "world" => %{"c" => "d"}}}}
+  end
 end

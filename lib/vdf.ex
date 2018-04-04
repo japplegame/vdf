@@ -4,6 +4,20 @@ defmodule VDF do
   end
 
   def decode(str) when is_binary(str) do
+    str =
+      case :unicode.bom_to_encoding(str) do
+        {:latin1, 0} ->
+          str
+
+        {:utf8, bom_length} ->
+          <<_::binary-size(bom_length), str::binary>> = str
+          str
+
+        {encoding, bom_length} ->
+          <<_::binary-size(bom_length), str::binary>> = str
+          :unicode.characters_to_binary(str, encoding)
+      end
+
     {_, data} = skip_ws({str, 1, 1})
     decode(data, %{})
   end
