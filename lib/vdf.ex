@@ -167,14 +167,24 @@ defmodule VDF do
     end
   end
 
-  def skip_ws({str, line, pos} = data, ws_found \\ false) do
+  defp skip_ws({str, line, pos} = data, ws_found \\ false) do
     case str do
       "\n\r" <> str -> skip_ws({str, line + 1, 1}, true)
       "\n" <> str -> skip_ws({str, line + 1, 1}, true)
       "\r" <> str -> skip_ws({str, line + 1, 1}, true)
       "\t" <> str -> skip_ws({str, line, pos + 1}, true)
       " " <> str -> skip_ws({str, line, pos + 1}, true)
+      "//" <> str -> skip_comment({str, line, pos + 2})
       _ -> {ws_found, data}
+    end
+  end
+
+  defp skip_comment({str, line, pos} = data) do
+    case str do
+      "\r" <> _ -> skip_ws(data)
+      "\n" <> _ -> skip_ws(data)
+      <<_::utf8, str::binary>> -> skip_comment({str, line, pos + 1})
+      _ -> {true, data}
     end
   end
 end

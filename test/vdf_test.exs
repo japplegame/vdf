@@ -22,6 +22,11 @@ defmodule VDFTest do
              {:ok, %{"a" => %{"b" => %{"c" => "d"}, "d" => "e"}, "b" => "c"}}
   end
 
+  test "comments" do
+    assert VDF.decode(~s/a {b c d e} b\/\/ comments!{} \n{ "c " \/\/ комментарии\n d e "f" \n}/) ==
+             {:ok, %{"a" => %{"b" => "c", "d" => "e"}, "b" => %{"c " => "d", "e" => "f"}}}
+  end
+
   test "unicode" do
     utf16_le_str =
       :unicode.encoding_to_bom({:utf16, :little}) <>
